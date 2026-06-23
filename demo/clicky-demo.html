@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clicky for Windows — Live Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d0f0e;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+    cursor: none;
+  }
+
+  /* ── System Tray ───────────────────────────────── */
+  .taskbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: #1a1c1b;
+    border-top: 1px solid #2a2d2c;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 1000;
+  }
+  .taskbar .time {
+    color: #adb5b2;
+    font-size: 12px;
+    margin-left: auto;
+  }
+  .tray-icon {
+    width: 28px;
+    height: 28px;
+    background: #1a1c1b;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    margin-left: 8px;
+    transition: background 0.15s;
+  }
+  .tray-icon:hover { background: #2a2d2c; }
+  .tray-icon svg { width: 18px; height: 18px; }
+
+  /* ── Companion Panel ──────────────────────────── */
+  .panel {
+    position: fixed;
+    bottom: 56px;
+    right: 16px;
+    width: 320px;
+    background: #101211;
+    border-radius: 12px;
+    border: 1px solid #373b39;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    display: none;
+    z-index: 999;
+    overflow: hidden;
+  }
+  .panel.open { display: block; }
+  .panel-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #373b39;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .panel-header .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(96,165,250,0.4);
+  }
+  .panel-header .dot.active { background: #60a5fa; }
+  .panel-header .dot.idle { background: #6b736f; }
+  .panel-header .title { color: #eceeed; font-size: 14px; font-weight: 600; flex: 1; }
+  .panel-header .close {
+    color: #6b736f; font-size: 14px; cursor: pointer;
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: rgba(255,255,255,0.06);
+  }
+  .panel-body { padding: 16px; }
+  .panel-body .status {
+    color: #adb5b2; font-size: 12px; margin-bottom: 12px;
+  }
+  .panel-body label {
+    color: #6b736f; font-size: 11px; display: block; margin: 12px 0 6px;
+  }
+  .panel-body select, .panel-body input {
+    width: 100%; padding: 8px 10px;
+    background: #202221; color: #eceeed;
+    border: 1px solid #373b39; border-radius: 6px;
+    font-size: 12px; outline: none;
+  }
+  .panel-body select:focus, .panel-body input:focus {
+    border-color: #2563eb;
+  }
+  .panel-footer {
+    padding: 12px 16px; border-top: 1px solid #373b39;
+    display: flex; justify-content: space-between;
+  }
+  .panel-footer button {
+    background: none; border: none; color: #6b736f; cursor: pointer;
+    font-size: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .panel-footer button:hover { color: #adb5b2; }
+
+  /* ── Desktop Icons ──────────────────────────── */
+  .desktop-icons {
+    position: fixed; top: 20px; left: 20px;
+    display: flex; flex-direction: column; gap: 16px;
+    z-index: 1;
+  }
+  .desktop-icon {
+    width: 64px; text-align: center; cursor: pointer;
+  }
+  .desktop-icon .icon {
+    width: 48px; height: 48px; margin: 0 auto 4px;
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .desktop-icon .label {
+    color: #eceeed; font-size: 11px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    word-wrap: break-word;
+  }
+
+  /* ── Notepad Window ─────────────────────────── */
+  .window {
+    position: fixed; top: 60px; left: 120px;
+    width: 560px; height: 400px;
+    background: #1e1f1d; border-radius: 10px;
+    border: 1px solid #373b39; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    z-index: 10;
+  }
+  .window-titlebar {
+    padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid #373b39;
+  }
+  .window-titlebar .dots { display: flex; gap: 6px; }
+  .window-titlebar .dot-btn {
+    width: 12px; height: 12px; border-radius: 50%;
+  }
+  .window-titlebar .dot-btn.red { background: #ff5f56; }
+  .window-titlebar .dot-btn.yellow { background: #ffbd2e; }
+  .window-titlebar .dot-btn.green { background: #27c93f; }
+  .window-titlebar .title { color: #adb5b2; font-size: 12px; margin-left: 8px; }
+  .window-content {
+    padding: 20px; color: #d4d4d4; font-size: 14px; line-height: 1.8;
+    font-family: 'Segoe UI', sans-serif;
+    height: calc(100% - 41px);
+  }
+  .window-content .highlight {
+    background: rgba(96,165,250,0.15);
+    border: 1px solid rgba(96,165,250,0.4);
+    border-radius: 3px; padding: 0 2px;
+    transition: all 0.3s;
+  }
+
+  /* ── BLUE CURSOR OVERLAY ────────────────────── */
+  #cursor-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 9999;
+    display: none;
+  }
+  #cursor-overlay.active { display: block; }
+
+  #buddy {
+    position: absolute;
+    width: 36px; height: 36px;
+    transform: translate(-50%, -50%);
+    transition: none;
+  }
+  #buddy svg { width: 100%; height: 100%; filter: drop-shadow(0 0 8px rgba(96,165,250,0.6)); }
+
+  /* Waveform bars */
+  #waveform {
+    position: absolute; display: none;
+    transform: translate(-50%, -50%);
+    gap: 3px; align-items: flex-end;
+    height: 40px;
+  }
+  #waveform.active { display: flex; }
+  #waveform .bar {
+    width: 3px; background: #60a5fa;
+    border-radius: 1.5px;
+    transition: height 0.06s ease;
+    box-shadow: 0 0 6px rgba(96,165,250,0.4);
+  }
+
+  /* Spinner */
+  #spinner {
+    position: absolute; display: none;
+    width: 20px; height: 20px;
+    transform: translate(-50%, -50%);
+  }
+  #spinner.active { display: block; }
+  #spinner .arc {
+    width: 20px; height: 20px;
+    border: 2.5px solid transparent;
+    border-top-color: #60a5fa;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(96,165,250,0.6));
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Text bubble */
+  #bubble {
+    position: absolute; display: none;
+    max-width: 300px;
+    background: rgba(23,25,24,0.95);
+    border-radius: 10px; padding: 10px 14px;
+    border: 0.8px solid rgba(55,59,57,0.5);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    transform: translate(0, -50%);
+    color: #eceeed; font-size: 13px; line-height: 1.4;
+  }
+  #bubble.active { display: block; }
+
+  /* Controls UI */
+  .controls {
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 100; align-items: center;
+  }
+  .controls button {
+    padding: 8px 16px; border: 1px solid #373b39;
+    background: #1a1c1b; color: #eceeed; border-radius: 6px;
+    cursor: pointer; font-size: 12px; transition: all 0.15s;
+  }
+  .controls button:hover { background: #2a2d2c; border-color: #2563eb; }
+  .controls button.primary { background: #2563eb; border-color: #2563eb; }
+  .controls button.primary:hover { background: #1d4ed8; }
+  .controls .state-label {
+    color: #6b736f; font-size: 11px; margin-left: 8px;
+    min-width: 100px; text-align: center;
+  }
+  .controls .state-label span { color: #60a5fa; }
+
+  /* Status bar */
+  .status-bar {
+    position: fixed; top: 8px; right: 16px;
+    display: flex; align-items: center; gap: 8px;
+    z-index: 100; font-size: 11px; color: #6b736f;
+  }
+  .status-bar .indicator {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.4);
+  }
+
+  /* Notification toast */
+  .toast {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    background: #1a1c1b; border: 1px solid #373b39;
+    border-radius: 8px; padding: 10px 18px;
+    color: #eceeed; font-size: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    z-index: 10000; display: none;
+    animation: slideDown 0.3s ease;
+  }
+  @keyframes slideDown { from { transform: translateX(-50%) translateY(-20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+
+  /* Onboarding overlay */
+  .onboarding {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center;
+    z-index: 10001;
+  }
+  .onboarding.open { display: flex; }
+  .onboarding .card {
+    background: #101211; border-radius: 16px;
+    border: 1px solid #373b39; padding: 32px;
+    max-width: 420px; text-align: center;
+  }
+  .onboarding .card h2 { color: #eceeed; font-size: 20px; margin-bottom: 12px; }
+  .onboarding .card p { color: #adb5b2; font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
+  .onboarding .card .big-icon { font-size: 48px; margin-bottom: 16px; }
+  .onboarding .card button {
+    padding: 10px 28px; background: #2563eb; border: none;
+    color: white; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .onboarding .card button:hover { background: #1d4ed8; }
+  .onboarding .card .shortcut {
+    display: inline-block; margin: 16px 0;
+    padding: 8px 16px; background: #202221; border-radius: 6px;
+    color: #60a5fa; font-family: monospace; font-size: 14px;
+  }
+
+  /* Pointing highlight */
+  .point-highlight {
+    position: fixed; width: 16px; height: 16px;
+    border: 2px solid #60a5fa; border-radius: 50%;
+    pointer-events: none; z-index: 9998;
+    display: none;
+    box-shadow: 0 0 20px rgba(96,165,250,0.5);
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } }
+</style>
+</head>
+<body>
+
+<!-- Desktop Background -->
+<div class="desktop-icons">
+  <div class="desktop-icon"><div class="icon" style="background: #2563eb;">📁</div><div class="label">Projects</div></div>
+  <div class="desktop-icon"><div class="icon" style="background: #059669;">📄</div><div class="label">Notes</div></div>
+  <div class="desktop-icon"><div class="icon" style="background: #d97706;">⚙️</div><div class="label">Settings</div></div>
+</div>
+
+<!-- Notepad Window -->
+<div class="window" id="notepad">
+  <div class="window-titlebar">
+    <div class="dots">
+      <div class="dot-btn red"></div>
+      <div class="dot-btn yellow"></div>
+      <div class="dot-btn green"></div>
+    </div>
+    <span class="title">📝 Todo List — Notepad</span>
+  </div>
+  <div class="window-content" id="notepad-content">
+    <strong>✅ Today's Tasks</strong><br><br>
+    ☐ Review Q2 budget report<br>
+    ☐ <span class="highlight" id="point-target">Design new landing page</span><br>
+    ☐ Update team on project timeline<br>
+    ☐ Prepare client presentation<br>
+    ☐ <span class="highlight">Refactor auth module</span><br><br>
+    <span style="color:#6b736f;font-size:12px;">--- press Ctrl+Alt and ask about the landing page ---</span>
+  </div>
+</div>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <span class="indicator" id="status-indicator"></span>
+  <span id="status-text">System Tray Active</span>
+</div>
+
+<!-- System Taskbar -->
+<div class="taskbar">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span style="color:#6b736f;font-size:12px;">Start</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:4px;margin-left:20px;">
+    <div style="width:24px;height:24px;background:#202221;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#6b736f;">📝</div>
+  </div>
+  <div class="time" id="clock"></div>
+  <div class="tray-icon" id="tray-button" onclick="togglePanel()">
+    <svg viewBox="0 0 18 18" fill="none">
+      <path d="M9 3L4 11h10L9 3z" fill="#60a5fa" transform="rotate(35 9 7)"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Companion Panel -->
+<div class="panel" id="panel">
+  <div class="panel-header">
+    <div class="dot active" id="panel-dot"></div>
+    <span class="title">Clicky</span>
+    <span style="color:#6b736f;font-size:11px;flex:1;text-align:right;" id="panel-status">Active</span>
+    <div class="close" onclick="togglePanel()">✕</div>
+  </div>
+  <div class="panel-body">
+    <div class="status" id="panel-status-text">Hold Ctrl+Alt to talk.</div>
+
+    <label>Model</label>
+    <select>
+      <option>anthropic/claude-sonnet-4-6</option>
+      <option>openai/gpt-4o</option>
+      <option>google/gemini-2.5-pro</option>
+    </select>
+
+    <label>TTS Provider</label>
+    <select onchange="document.getElementById('api-section').style.display=this.selectedIndex===1?'block':'none'">
+      <option>Edge TTS (Free)</option>
+      <option>ElevenLabs</option>
+    </select>
+
+    <div id="api-section" style="display:none;margin-top:8px;">
+      <label>API Key</label>
+      <input type="password" placeholder="Enter ElevenLabs API key">
+    </div>
+
+    <label style="margin-top:16px;">Status</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:#22c55e;">✅ Microphone</span>
+      <span style="font-size:11px;color:#22c55e;">✅ Screen Capture</span>
+      <span style="font-size:11px;color:#22c55e;">✅ Hotkey</span>
+    </div>
+  </div>
+  <div class="panel-footer">
+    <button onclick="if(confirm('Quit Clicky?')){document.body.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100vh;color:#6b736f;font-family:sans-serif;\\'>Clicky has quit. <button onclick=\\'location.reload()\\' style=\\'margin-left:8px;padding:4px 12px;background:#2563eb;color:white;border:none;border-radius:4px;cursor:pointer;\\'>Restart</button></div>';}">
+      ⏻ Quit
+    </button>
+    <button onclick="showOnboarding()">▶ Watch Onboarding</button>
+  </div>
+</div>
+
+<!-- Cursor Overlay -->
+<div id="cursor-overlay">
+  <div id="buddy">
+    <svg viewBox="0 0 36 36" fill="none">
+      <polygon points="18,4 8,28 28,28" fill="#60a5fa" opacity="0.9"/>
+    </svg>
+  </div>
+  <div id="waveform"></div>
+  <div id="spinner"><div class="arc"></div></div>
+  <div id="bubble">Hello! I see you're working on a todo list.</div>
+</div>
+
+<!-- Point highlight -->
+<div class="point-highlight" id="point-highlight"></div>
+
+<!-- Onboarding -->
+<div class="onboarding" id="onboarding">
+  <div class="card">
+    <div class="big-icon">🟦</div>
+    <h2>Welcome to Clicky!</h2>
+    <p>I'm an AI buddy that lives next to your cursor. I can see your screen, hear your voice, and point at things — just like having a teacher beside you.</p>
+    <div class="shortcut">Ctrl + Alt</div>
+    <p style="font-size:12px;margin-bottom:16px;">Press and hold to talk, release when done.</p>
+    <button onclick="startDemo()">▶ Watch Demo</button>
+    <br><br>
+    <button onclick="closeOnboarding()" style="background:#202221;color:#adb5b2;font-weight:normal;">Skip</button>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <button class="primary" onclick="toggleListening()" id="talk-btn">🎤 Hold to Talk (Ctrl+Alt)</button>
+  <button onclick="simulateResponse()" id="ask-btn">🤖 Ask Clicky</button>
+  <button onclick="showOnboarding()">❓ Help</button>
+  <span class="state-label" id="state-label">State: <span id="state-text">Idle</span></span>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">🔵 Clicky is running in the system tray</div>
+
+<script>
+  // ── State Machine ──────────────────────────────────
+  const State = { IDLE: 'Idle', LISTENING: 'Listening', PROCESSING: 'Processing', RESPONDING: 'Responding', POINTING: 'Pointing' };
+  let currentState = State.IDLE;
+  let isListening = false;
+  let isCtrlDown = false;
+  let isAltDown = false;
+  let bubbleTexts = [
+    "That's the landing page design task — nice work!",
+    "I can see the todo list. You're making great progress!",
+    "The design specs look solid! Ready to review?",
+    "I spot the refactoring task. Want me to look at the auth module?",
+    "Your desktop looks organized! Let's tackle that budget report."
+  ];
+  let pointingPhrases = [
+    "nice design work",
+    "solid progress here",
+    "that's the one",
+    "clean setup you got",
+    "good task to tackle"
+  ];
+
+  // ── Init ───────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('onboarding').classList.add('open');
+    updateClock();
+    setInterval(updateClock, 1000);
+    showToast('🟦 Clicky is running in the system tray');
+    initWaveform();
+  });
+
+  // ── Clock ──────────────────────────────────────────
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ── Tray Panel ─────────────────────────────────────
+  function togglePanel() {
+    document.getElementById('panel').classList.toggle('open');
+  }
+
+  // ── Toast ──────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+  }
+
+  // ── Onboarding ─────────────────────────────────────
+  function showOnboarding() {
+    document.getElementById('onboarding').classList.add('open');
+  }
+  function closeOnboarding() {
+    document.getElementById('onboarding').classList.remove('open');
+  }
+
+  function startDemo() {
+    closeOnboarding();
+    showToast('🎯 Watch Clicky point at things on your screen!');
+    document.getElementById('cursor-overlay').classList.add('active');
+    setState(State.POINTING);
+    flyToTarget(() => {
+      setState(State.RESPONDING);
+      setTimeout(() => { setState(State.IDLE); }, 2000);
+    });
+  }
+
+  // ── Waveform ───────────────────────────────────────
+  function initWaveform() {
+    const container = document.getElementById('waveform');
+    for (let i = 0; i < 24; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.style.height = '3px';
+      container.appendChild(bar);
+    }
+  }
+
+  function animateWaveform() {
+    const bars = document.querySelectorAll('#waveform .bar');
+    const time = Date.now() / 280;
+    bars.forEach((bar, i) => {
+      const phase = time + i * 0.35;
+      const idle = (Math.sin(phase) + 1) / 2 * 3;
+      const reactive = Math.random() * 8;
+      bar.style.height = (3 + reactive + idle) + 'px';
+    });
+    if (currentState === State.LISTENING) requestAnimationFrame(animateWaveform);
+  }
+
+  // ── Cursor Position ────────────────────────────────
+  document.addEventListener('mousemove', (e) => {
+    const buddy = document.getElementById('buddy');
+    const offsetX = 35, offsetY = 25;
+    buddy.style.left = (e.clientX + offsetX) + 'px';
+    buddy.style.top = (e.clientY + offsetY) + 'px';
+  });
+
+  // ── Keyboard (Ctrl+Alt) ────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Control') isCtrlDown = true;
+    if (e.key === 'Alt') isAltDown = true;
+    if (e.ctrlKey && e.altKey && !isListening && e.repeat === false) {
+      toggleListening();
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    if (e.key === 'Control') isCtrlDown = false;
+    if (e.key === 'Alt') isAltDown = false;
+    if (!isCtrlDown || !isAltDown) {
+      if (isListening) toggleListening();
+    }
+  });
+
+  // ── State Management ───────────────────────────────
+  function setState(state) {
+    currentState = state;
+    document.getElementById('state-text').textContent = state;
+    document.getElementById('panel-status').textContent = state;
+    const dot = document.getElementById('panel-dot');
+    dot.className = 'dot';
+
+    const overlay = document.getElementById('cursor-overlay');
+    const buddy = document.getElementById('buddy');
+    const waveform = document.getElementById('waveform');
+    const spinner = document.getElementById('spinner');
+    const bubble = document.getElementById('bubble');
+
+    // Hide everything first
+    buddy.style.display = 'none';
+    waveform.classList.remove('active');
+    spinner.classList.remove('active');
+    bubble.classList.remove('active');
+
+    switch (state) {
+      case State.IDLE:
+        overlay.classList.remove('active');
+        dot.classList.add('idle');
+        dot.style.background = '#6b736f';
+        dot.style.boxShadow = '0 0 8px rgba(107,115,111,0.4)';
+        document.getElementById('status-text').textContent = 'Ready';
+        document.getElementById('talk-btn').textContent = '🎤 Hold to Talk (Ctrl+Alt)';
+        document.getElementById('talk-btn').className = 'primary';
+        break;
+
+      case State.LISTENING:
+        overlay.classList.add('active');
+        buddy.style.display = 'none';
+        waveform.classList.add('active');
+        dot.style.background = '#60a5fa';
+        dot.style.boxShadow = '0 0 12px rgba(96,165,250,0.6)';
+        document.getElementById('status-text').textContent = '🎤 Listening...';
+        document.getElementById('talk-btn').textContent = '🔴 Release to stop';
+        document.getElementById('talk-btn').className = '';
+        document.getElementById('talk-btn').style.borderColor = '#ef4444';
+        animateWaveform();
+        break;
+
+      case State.PROCESSING:
+        overlay.classList.add('active');
+        spinner.classList.add('active');
+        dot.style.background = '#60a5fa';
+        document.getElementById('status-text').textContent = '⚙️ Thinking...';
+        break;
+
+      case State.RESPONDING:
+        overlay.classList.add('active');
+        bubble.classList.add('active');
+        dot.style.background = '#60a5fa';
+        document.getElementById('status-text').textContent = '💬 Responding...';
+        break;
+
+      case State.POINTING:
+        overlay.classList.add('active');
+        dot.style.background = '#60a5fa';
+        document.getElementById('status-text').textContent = '🎯 Pointing...';
+        break;
+    }
+  }
+
+  // ── Toggle Listening ──────────────────────────────
+  function toggleListening() {
+    if (currentState === State.LISTENING) {
+      isListening = false;
+      setState(State.PROCESSING);
+      setTimeout(() => simulateResponse(), 1200);
+    } else if (currentState === State.IDLE) {
+      isListening = true;
+      setState(State.LISTENING);
+      showToast('🎤 Listening... (release to stop)');
+    }
+  }
+
+  // ── Simulate AI Response ──────────────────────────
+  function simulateResponse() {
+    if (currentState === State.LISTENING) {
+      isListening = false;
+      setState(State.PROCESSING);
+    }
+    if (currentState !== State.PROCESSING && currentState !== State.IDLE) return;
+    if (currentState === State.IDLE) setState(State.PROCESSING);
+
+    const btn = document.getElementById('talk-btn');
+    btn.textContent = '🤖 Thinking...';
+    btn.className = '';
+
+    // Pick a random target if pointing
+    if (Math.random() > 0.4) {
+      setTimeout(() => {
+        setState(State.POINTING);
+        flyToTarget(() => {
+          streamResponse();
+        });
+      }, 800);
+    } else {
+      setTimeout(() => streamResponse(), 800);
+    }
+  }
+
+  function streamResponse() {
+    setState(State.RESPONDING);
+    const text = bubbleTexts[Math.floor(Math.random() * bubbleTexts.length)];
+    const bubble = document.getElementById('bubble');
+    bubble.textContent = '';
+
+    // Character-by-character streaming
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < text.length) {
+        bubble.textContent += text[i];
+        i++;
+      } else {
+        clearInterval(interval);
+        // Auto TTS and hide
+        setTimeout(() => {
+          showToast('🔊 Speaking response...');
+          setTimeout(() => {
+            setState(State.IDLE);
+            document.getElementById('talk-btn').textContent = '🎤 Hold to Talk (Ctrl+Alt)';
+            document.getElementById('talk-btn').className = 'primary';
+          }, 2500);
+        }, 500);
+      }
+    }, 35);
+  }
+
+  // ── Flight Animation (Bezier arc) ─────────────────
+  function flyToTarget(callback) {
+    const target = document.getElementById('point-target');
+    const highlight = document.getElementById('point-highlight');
+    const buddy = document.getElementById('buddy');
+    buddy.style.display = 'block';
+
+    const rect = target.getBoundingClientRect();
+    const endX = rect.left + rect.width / 2;
+    const endY = rect.top + rect.height / 2;
+
+    // Show highlight circle
+    highlight.style.display = 'block';
+    highlight.style.left = (endX - 8) + 'px';
+    highlight.style.top = (endY - 8) + 'px';
+
+    // Get current cursor position
+    const startX = parseFloat(buddy.style.left) || window.innerWidth / 2;
+    const startY = parseFloat(buddy.style.top) || window.innerHeight / 2;
+
+    // Calculate bezier control point for arc
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const nx = -dy / len;
+    const ny = dx / len;
+    const arcHeight = 80;
+    const cpx = midX + nx * arcHeight;
+    const cpy = midY + ny * arcHeight;
+
+    // Animate along quadratic bezier
+    let progress = 0;
+    const duration = 600;
+    const startTime = performance.now();
+
+    function animateFlight(now) {
+      progress = Math.min(1, (now - startTime) / duration);
+      const t = progress;
+      const omt = 1 - t;
+      const x = omt*omt*startX + 2*omt*t*cpx + t*t*endX;
+      const y = omt*omt*startY + 2*omt*t*cpy + t*t*endY;
+      buddy.style.left = x + 'px';
+      buddy.style.top = y + 'px';
+
+      if (progress < 1) {
+        requestAnimationFrame(animateFlight);
+      } else {
+        // Arrived! Show bubble with pointing phrase
+        const phrase = pointingPhrases[Math.floor(Math.random() * pointingPhrases.length)];
+        const bubble = document.getElementById('bubble');
+        bubble.textContent = `"${phrase}" [POINT:${Math.round(endX)},${Math.round(endY)}:landing page task]`;
+        bubble.classList.add('active');
+
+        setTimeout(() => {
+          highlight.style.display = 'none';
+          if (callback) callback();
+        }, 1500);
+      }
+    }
+    requestAnimationFrame(animateFlight);
+  }
+
+  // Click on highlighted element to trigger pointing
+  document.getElementById('point-target')?.addEventListener('click', () => {
+    if (currentState === State.IDLE) {
+      setState(State.POINTING);
+      flyToTarget(() => {
+        setState(State.RESPONDING);
+        setTimeout(() => setState(State.IDLE), 2000);
+      });
+    }
+  });
+
+  // ── Resize handler ────────────────────────────────
+  window.addEventListener('resize', () => {
+    const overlay = document.getElementById('cursor-overlay');
+    if (overlay.classList.contains('active') && currentState === State.IDLE) {
+      overlay.classList.remove('active');
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "OpenRouterApiKey": "YOUR_OPENROUTER_KEY_HERE",
+  "SelectedModel": "anthropic/claude-sonnet-4-6",
+  "FallbackModel": "openai/gpt-4o-mini",
+  "TtsProvider": "windows",
+  "ElevenLabsApiKey": "",
+  "ElevenLabsVoiceId": "",
+  "TranscriptionProvider": "openrouter",
+  "UseCtrlAlt": true,
+  "UseCtrlShift": false,
+  "UseAltShift": false,
+  "UseCtrlAltShift": false,
+  "ShowClickyCursor": true,
+  "TextOnlyMode": false,
+  "AudioFeedbackEnabled": true,
+  "LaunchAtStartup": false,
+  "HasCompletedOnboarding": false,
+  "RecentInteractions": []
+}
