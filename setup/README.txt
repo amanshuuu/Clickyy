@@ -6,44 +6,53 @@
    An AI buddy that lives next to your cursor.
    It can see your screen, talk to you, and point at things.
 
-🔷 QUICK START (From ZIP)
+🔷 BEFORE RUNNING CLICKY (REQUIRED)
+   
+   Clicky needs .NET 8 Desktop Runtime installed first.
+   
+   Download and install from Microsoft:
+   https://aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe
+   
+   Run the installer → Next → Next → Done (30 seconds)
+   Only need to do this once.
 
-   Just double-click Clicky.bat (or Clicky.ps1) — it will:
-   1. ✅ Check if .NET 8 Runtime is installed (auto-installs if not)
-   2. ✅ Check if Clicky.exe exists (downloads if not)
-   3. ✅ Launch Clicky
+🔷 HOW TO RUN
+   
+   1. Extract the ZIP anywhere on your PC
+   2. Double-click Clicky.exe
+   3. Blue triangle icon appears in system tray
+   4. Get free API key: https://openrouter.ai
+   5. Click tray icon → Settings → Paste key → Save
+   6. Press Ctrl+Alt to start talking!
 
-   That's it! No manual steps needed.
+🔷 TROUBLESHOOTING
+
+   "Side-by-side configuration is incorrect"
+     → Install .NET 8 Desktop Runtime (link above)
+
+   "Nothing happens when I double-click"
+     → Right-click Clicky.exe → Run as Administrator
+
+   "Hotkey doesn't work"
+     → Right-click Clicky.exe → Run as Administrator
+
+   "Blue triangle not in system tray"
+     → Click the ^ arrow near clock → Drag Clicky icon to visible area
 
 🔷 ONE-CLICK INSTALL (to Start Menu)
    
-   Right-click setup/install.ps1 → "Run with PowerShell"
+   Right-click install.ps1 → "Run with PowerShell"
    
    Or open PowerShell as Admin:
      Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-     .\setup\install.ps1
-
-🔷 WHAT GETS INSTALLED
-   • Clicky.exe → %LOCALAPPDATA%\Clicky\
-   • Start Menu shortcut
-   • Desktop shortcut
-   • Auto-start on login
-   • Uninstaller
-
-🔷 FIRST TIME SETUP
-   1. Launch Clicky (blue triangle icon in system tray)
-   2. Get a free API key from https://openrouter.ai
-   3. Click tray icon → Settings → Enter API key → Save
-   4. Press Ctrl+Alt to start talking!
+     .\install.ps1
 
 🔷 REQUIREMENTS
    • Windows 10 or 11 (64-bit)
-   • Microphone
-   • Internet connection
-   • .NET 8 Runtime (auto-installed by Clicky.bat)
+   • Microphone (for voice input)
+   • Internet connection (for AI features)
+   • .NET 8 Desktop Runtime (install once from link above)
 
-🔷 TROUBLESHOOTING
-   • "Side-by-side configuration error" → Run Clicky.bat, it installs .NET 8
-   • App doesn't start? → Right-click → Run as Administrator
-   • Hotkey not working? → Run as Administrator
-   • Need help? → Open an issue on GitHub
+🔷 FREE API KEY NEEDED
+   OpenRouter (AI vision + transcription):
+     https://openrouter.ai (free credits on signup)

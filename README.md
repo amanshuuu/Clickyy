@@ -2,86 +2,47 @@
 
 **AI buddy that lives next to your cursor.** See your screen, talk to it, and it points at things.
 
-> 🪟 **Windows Only** — This is a Windows desktop app (WPF/.NET 8). Does NOT run on Linux/Mac.
+> 🪟 **Windows 10/11 only** — This is a Windows desktop app (WPF/.NET 8). Does NOT run on Linux/Mac.
 
 ---
 
-## 🚀 How to Install & Run (Windows Only)
+## 🚀 Quick Start (from ZIP)
 
-### ✅ Option 1: Download ZIP → Extract → Run (EASIEST)
+### Step 1: Install .NET 8 Runtime (one time only)
 
-1. Go to **[GitHub Releases](https://github.com/amanshuuu/Clickyy/releases)**
-2. Download **`Clickyy-v1.0.0.zip`** (66MB, includes everything)
-3. **Extract** the ZIP anywhere on your Windows PC
-4. **Double-click** `Clicky.exe` — that's it!
+Clicky needs **.NET 8 Desktop Runtime**. Install it from Microsoft:
 
-> The ZIP already contains the EXE. No download, no install, no .NET needed.
+➡️ **[Download .NET 8 Desktop Runtime](https://aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe)**
 
-### ✅ Option 2: Bootstrap Script (auto-downloads)
+Run the installer → click Next → done. (Takes 30 seconds.)
 
-1. Download **`Clicky.bat`** or **`Clicky.ps1`** from GitHub Releases
-2. Double-click it — it auto-downloads `Clicky.exe` and launches
+### Step 2: Run Clicky
 
-### ✅ Option 3: Install to Start Menu
+1. Download **`Clickyy-v1.0.0.zip`** from [Releases](https://github.com/amanshuuu/Clickyy/releases)
+2. **Extract** anywhere on your PC
+3. **Double-click** `Clicky.exe` — blue triangle icon appears in system tray
 
-```powershell
-Right-click setup/install.ps1 → "Run with PowerShell"
-```
+### Step 3: Get a Free API Key
 
----
+4. Go to **[openrouter.ai](https://openrouter.ai)** → Sign up → Create API key
+5. Click the blue triangle in system tray → Settings → Paste API key → Save
 
-## 🔑 Get Your Free API Key
+### Step 4: Start Talking
 
-Clicky needs **one free API key** to work:
-
-| Service | What | How |
-|---|---|---|
-| **OpenRouter** | AI vision + voice transcription | [openrouter.ai](https://openrouter.ai) — free credits on signup |
-
-1. Go to [openrouter.ai](https://openrouter.ai)
-2. Sign up → Create API key → Copy it
-3. Launch Clicky → Click tray icon (blue triangle) → Settings → Paste key → Save
+6. Press & hold **`Ctrl+Alt`** → blue overlay appears
+7. Speak your question → release **`Ctrl+Alt`**
+8. Clicky sees your screen, answers, and points at things!
 
 ---
 
-## 🎮 How to Use
+## ⚠️ If Clicky Doesn't Start
 
-| Action | What happens |
+| Problem | Solution |
 |---|---|
-| **Press & hold `Ctrl+Alt`** | Blue overlay appears + waveform animates |
-| **Speak your question** | Microphone captures your voice |
-| **Release `Ctrl+Alt`** | Screen captured + voice transcribed → sent to AI |
-| **Clicky responds** | Text bubble + voice speaks the answer |
-| **Clicky points** 🎯 | Blue cursor flies to elements on your screen |
-
----
-
-## ⚙️ Features
-
-- **Configurable hotkey** — Ctrl+Alt, Ctrl+Shift, Alt+Shift, or all three
-- **Multi-monitor** — Full support for multiple displays
-- **Text-only mode** — Disable screen capture for privacy
-- **Audio chimes** — Hear when recording starts/stops
-- **Interaction history** — Last 20 conversations saved
-- **Model fallback** — Auto-retries with backup if primary fails
-- **Auto-start** — Launch on login (toggle in settings)
-
----
-
-## 🏗️ Project Structure
-
-```
-📁 Clickyy/
-├── 🚀 Clicky.exe          ← The app (just double-click to run!)
-├── 🚀 Clicky.bat          ← Bootstrap launcher
-├── 🚀 Clicky.ps1          ← PowerShell launcher
-├── 📄 README.md           ← This file
-├── 📁 ClickyWindows/      ← Full C# source code (27 files)
-├── 📁 setup/              ← Install scripts + settings
-└── 📁 demo/               ← Interactive HTML demo
-```
-
-**Built with:** .NET 8 / WPF / Win32 interop / NAudio / OpenRouter API
+| **"Side-by-side configuration error"** | Install [.NET 8 Desktop Runtime](https://aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe) |
+| **Nothing happens when double-clicking** | Right-click `Clicky.exe` → **Run as Administrator** |
+| **Hotkey doesn't work** | Run Clicky as Administrator |
+| **Blue triangle not in tray** | Click the `^` arrow near clock to show hidden icons |
 
 ---
 
@@ -93,12 +54,27 @@ Clicky needs **one free API key** to work:
 
 ---
 
-## ❓ Troubleshooting
+## ✨ Features
 
-- **"localhost refused to connect"?** You're running on Linux/Mac. This is Windows-only.
-- **App doesn't start?** Run as Administrator (right-click → Run as admin)
-- **Hotkey not working?** Try running as Administrator
-- **No sound?** Check Windows Volume Mixer
-- **Need help?** [Open an issue](https://github.com/amanshuuu/Clickyy/issues)
+- **Configurable hotkey** — Ctrl+Alt, Ctrl+Shift, Alt+Shift, or all three
+- **Multi-monitor support**
+- **Text-only privacy mode** — Disable screen capture
+- **Interaction history** — Last 20 conversations saved
+- **Model fallback** — Auto-retries with backup if primary fails
+- **Auto-start on login** — Toggle in settings
 
-> 💡 **Questions?** Open an issue on GitHub!
+---
+
+## 🏗️ Project Structure
+
+```
+📁 Clickyy/
+├── 🚀 Clicky.exe          ← The app (double-click to run)
+├── 🚀 Clicky.bat          ← Launcher script
+├── 🚀 Clicky.ps1          ← PowerShell launcher
+├── 📁 ClickyWindows/      ← Full C# source code (27 files)
+├── 📁 setup/              ← Install scripts + settings
+└── 📁 demo/               ← Interactive HTML demo
+```
+
+**Built with:** .NET 8 / WPF / Win32 interop / NAudio / OpenRouter API
