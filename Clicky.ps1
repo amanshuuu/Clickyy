@@ -1,14 +1,15 @@
 <#
 .SYNOPSIS
     Clicky - AI Buddy for Windows
-    Quick launcher. Auto-detects Clicky.exe in the same folder (ZIP distro)
-    or downloads it from GitHub on first run (standalone script).
+    Auto-installs .NET 8 Runtime if missing, auto-downloads Clicky.exe
+    if missing, then launches. Works standalone or from ZIP.
 #>
 
 $ErrorActionPreference = "Stop"
 $Host.UI.RawUI.WindowTitle = "Clicky - AI Buddy for Windows"
 
 $ExeUrl = "https://github.com/amanshuuu/Clickyy/releases/download/v1.0.0/Clicky.exe"
+$DotNetUrl = "https://aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ExePath = Join-Path $ScriptDir "Clicky.exe"
 
@@ -20,41 +21,75 @@ function Write-Header {
     Write-Host ""
 }
 
-# If Clicky.exe already exists (ZIP distro or previously downloaded), launch it
-if (Test-Path $ExePath) {
-    Write-Header
-    Write-Host "🚀 Launching Clicky..." -ForegroundColor Green
-    Start-Process -FilePath $ExePath
-    exit
+Write-Header
+
+# ================================================================
+# STEP 1: Check .NET 8 Desktop Runtime
+# ================================================================
+function Test-DotNet8Runtime {
+    try {
+        $dotnet = Get-Command "dotnet" -ErrorAction SilentlyContinue
+        if ($dotnet) {
+            $runtimes = & dotnet --list-runtimes 2>$null
+            if ($runtimes -match "Microsoft.WindowsDesktop.App 8\.") {
+                return $true
+            }
+        }
+    } catch {}
+    return $false
 }
 
-# First run — download Clicky.exe
-Write-Header
-Write-Host "📦 First time! Downloading Clicky.exe (69MB)..." -ForegroundColor Yellow
+if (-not (Test-DotNet8Runtime)) {
+    Write-Host "[1/3] .NET 8 Runtime not found. Installing..." -ForegroundColor Yellow
+    Write-Host "Downloading .NET 8 Desktop Runtime (~80MB)..." -ForegroundColor White
+    
+    $installerPath = "$env:TEMP\dotnet-runtime-desktop-8-installer.exe"
+    
+    try {
+        $wc = New-Object System.Net.WebClient
+        $wc.DownloadFile($DotNetUrl, $installerPath)
+        Write-Host "Installing .NET 8 Runtime (silent)..." -ForegroundColor Yellow
+        $proc = Start-Process -FilePath $installerPath -ArgumentList "/install", "/quiet", "/norestart" -Wait -PassThru -NoNewWindow
+        
+        if ($proc.ExitCode -eq 0 -or $proc.ExitCode -eq 3010) {
+            Write-Host "✅ .NET 8 Runtime installed!" -ForegroundColor Green
+        } else {
+            Write-Host "⚠️ .NET install returned code $($proc.ExitCode). Proceeding anyway..." -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "⚠️ Could not install .NET Runtime: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "   Install manually from: https://dotnet.microsoft.com/en-us/download/dotnet/8.0/runtime-desktop-8.0.14-windows-x64-installer" -ForegroundColor White
+    }
+} else {
+    Write-Host "✅ .NET 8 Runtime detected" -ForegroundColor Green
+}
+
+# ================================================================
+# STEP 2: Check Clicky.exe
+# ================================================================
+if (-not (Test-Path $ExePath)) {
+    Write-Host "[2/3] Clicky.exe not found. Downloading..." -ForegroundColor Yellow
+    try {
+        $wc = New-Object System.Net.WebClient
+        $wc.DownloadFile($ExeUrl, $ExePath)
+        Write-Host "✅ Downloaded Clicky.exe" -ForegroundColor Green
+    } catch {
+        Write-Host "❌ Download failed: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "Download manually from: https://github.com/amanshuuu/Clickyy/releases" -ForegroundColor Cyan
+        pause
+        exit
+    }
+} else {
+    Write-Host "✅ Clicky.exe found" -ForegroundColor Green
+}
+
+# ================================================================
+# STEP 3: Launch
+# ================================================================
+Write-Host "[3/3] Launching Clicky..." -ForegroundColor Green
+Write-Host ""
+Write-Host "🚀 Look for the blue triangle icon in your system tray" -ForegroundColor Cyan
+Write-Host "🎤 Press Ctrl+Alt to start talking to your AI buddy!" -ForegroundColor Cyan
 Write-Host ""
 
-try {
-    $wc = New-Object System.Net.WebClient
-    $wc.DownloadProgressChanged += {
-        param($sender, $e)
-        $pct = $e.ProgressPercentage
-        Write-Progress -Activity "Downloading Clicky (69MB)" -Status "$pct%" -PercentComplete $pct
-    }
-    $wc.DownloadFileAsync($ExeUrl, $ExePath)
-    while ($wc.IsBusy) { Start-Sleep -Milliseconds 200 }
-    Write-Progress -Activity "Downloading Clicky (69MB)" -Completed
-
-    if (-not (Test-Path $ExePath)) { throw "Download failed" }
-
-    Write-Host "✅ Download complete!" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "🚀 Launching Clicky..." -ForegroundColor Green
-    Start-Process -FilePath $ExePath
-}
-catch {
-    Write-Host "❌ Download failed: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Please download the ZIP from:" -ForegroundColor Yellow
-    Write-Host "https://github.com/amanshuuu/Clickyy/releases" -ForegroundColor Cyan
-    pause
-}
+Start-Process -FilePath $ExePath

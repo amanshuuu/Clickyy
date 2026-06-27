@@ -6,65 +6,44 @@
    An AI buddy that lives next to your cursor.
    It can see your screen, talk to you, and point at things.
 
-   Customize hotkey, toggle text-only privacy mode,
-   view interaction history — all from the settings panel.
+🔷 QUICK START (From ZIP)
 
-🔷 ONE-CLICK INSTALL
+   Just double-click Clicky.bat (or Clicky.ps1) — it will:
+   1. ✅ Check if .NET 8 Runtime is installed (auto-installs if not)
+   2. ✅ Check if Clicky.exe exists (downloads if not)
+   3. ✅ Launch Clicky
 
-   Option A — PowerShell Script (recommended):
-     Right-click install.ps1 → "Run with PowerShell"
-     
-     Or open PowerShell as Admin and run:
-       Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-       .\install.ps1
+   That's it! No manual steps needed.
 
-   Option B — Inno Setup Installer (if you have Inno Setup):
-     Open installer.iss in Inno Setup → Compile → Run Clicky-Setup.exe
-
-   Option C — Portable:
-     Just run Clicky.exe directly! No installation needed.
+🔷 ONE-CLICK INSTALL (to Start Menu)
+   
+   Right-click setup/install.ps1 → "Run with PowerShell"
+   
+   Or open PowerShell as Admin:
+     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+     .\setup\install.ps1
 
 🔷 WHAT GETS INSTALLED
    • Clicky.exe → %LOCALAPPDATA%\Clicky\
    • Start Menu shortcut
-   • Desktop shortcut (optional)
-   • Auto-start on login (optional)
+   • Desktop shortcut
+   • Auto-start on login
    • Uninstaller
 
 🔷 FIRST TIME SETUP
    1. Launch Clicky (blue triangle icon in system tray)
    2. Get a free API key from https://openrouter.ai
-   3. Click the tray icon → Settings → Enter your API key → Save
-   4. Press your hotkey (default: Ctrl+Alt) to start talking!
+   3. Click tray icon → Settings → Enter API key → Save
+   4. Press Ctrl+Alt to start talking!
 
 🔷 REQUIREMENTS
-   • Windows 10 or Windows 11 (64-bit)
-   • Microphone (for voice input)
-   • Internet connection (for AI features)
-
-🔷 UNINSTALL
-   • Run "%LOCALAPPDATA%\Clicky\uninstall.ps1"
-   • Or use Windows Settings → Apps → Clicky
-
-🔷 FREE API KEYS NEEDED
-   OpenRouter (for AI vision + transcription):
-     Sign up: https://openrouter.ai
-     Free credits on signup, no credit card required
-
-   Windows TTS (for voice output):
-     Built into Windows, FREE, no API key needed, works offline!
-
-🔷 FEATURES
-   • Configurable hotkey (Ctrl+Alt, Ctrl+Shift, Alt+Shift, Ctrl+Alt+Shift)
-   • Text-only privacy mode (disables screen capture)
-   • Audio feedback chimes for recording start/stop
-   • Auto-start on login
-   • Interaction history (saves last 20 conversations)
-   • Model fallback (auto-retries with backup if primary fails)
-   • Multi-monitor support
+   • Windows 10 or 11 (64-bit)
+   • Microphone
+   • Internet connection
+   • .NET 8 Runtime (auto-installed by Clicky.bat)
 
 🔷 TROUBLESHOOTING
-   • App doesn't start? Run as Administrator
-   • Hotkey not working? Try running as Administrator
-   • No sound? Check Windows Volume Mixer
-   • Need help? Open an issue on GitHub
+   • "Side-by-side configuration error" → Run Clicky.bat, it installs .NET 8
+   • App doesn't start? → Right-click → Run as Administrator
+   • Hotkey not working? → Run as Administrator
+   • Need help? → Open an issue on GitHub
