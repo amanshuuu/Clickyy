@@ -2,114 +2,95 @@
 
 **AI buddy that lives next to your cursor.** See your screen, talk to it, and it points at things.
 
-## 📸 What It Does
+---
 
-| Step | What Happens |
-|---|---|
-| 1. **Press & hold hotkey** 🎤 | Transparent overlay appears with blue cursor buddy, waveform animates to your voice |
-| 2. **Speak your question** 🗣️ | Microphone captures your voice (16kHz) |
-| 3. **Release hotkey** ✋ | Clicky captures your screen, transcribes your voice, sends both to AI |
-| 4. **AI thinks** 🤖 | OpenRouter vision model analyzes your screen + question (SSE streaming) |
-| 5. **Clicky responds** 🔊 | Text bubble appears + TTS speaks the answer |
-| 6. **Clicky points** 🎯 | Blue cursor flies to relevant UI elements using [POINT] tags |
+## 🚀 Zero Setup — Just Download & Run
 
-## 🚀 One-Click Install
+### Option 1: One-click (recommended)
 
-### Option 1: PowerShell (easiest)
+1. **Download** the ZIP from GitHub → **Extract** anywhere
+2. **Double-click** `Clicky.ps1` (or `Clicky.bat`)
+3. It automatically downloads Clicky.exe (69MB, one-time)
+4. **Get a free API key** at [openrouter.ai](https://openrouter.ai)
+5. **Press Ctrl+Alt** and start talking!
 
-```
-Right-click setup/install.ps1 → "Run with PowerShell"
-```
+> ⚡ Everything is automatic — no .NET, no installers, no dependencies.
 
-Or in PowerShell:
+### Option 2: Direct download (if you already have the exe)
+
+1. Download `Clicky.exe` from [Releases](https://github.com/amanshuuu/Clickyy/releases)
+2. Save it anywhere and double-click to run
+
+### Option 3: Install to Start Menu
+
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+# Right-click setup/install.ps1 → "Run with PowerShell"
 .\setup\install.ps1
 ```
 
-This **automatically**:
-* Installs Clicky.exe to `%LOCALAPPDATA%\Clicky\`
-* Creates **Start Menu** and **Desktop** shortcuts
-* Adds to **Windows startup** (optional)
-* Creates **uninstaller**
-* Adds **firewall rule** for network access
-* Launches Clicky when done!
+---
 
-### Option 2: Portable (no install)
+## 📖 How It Works
 
-Just run `setup\Clicky.exe` directly — works immediately.
+| Step | What happens |
+|---|---|
+| **Press & hold hotkey** 🎤 | Blue overlay appears + waveform animates to your voice |
+| **Speak** 🗣️ | Microphone captures your voice |
+| **Release hotkey** ✋ | Screen is captured + voice transcribed → sent to AI |
+| **AI responds** 🤖 | Text bubble + voice speaks the answer |
+| **Clicky points** 🎯 | Blue cursor flies to elements on your screen |
 
-## 📋 Requirements
+**Default hotkey:** `Ctrl+Alt` (configurable in settings)
 
-* **Windows 10 or Windows 11** (64-bit)
-* **Microphone** for voice input
-* **Internet connection** for AI features (TTS works offline)
+---
 
-## 🔑 Free API Keys Needed
+## 🔑 Get Your Free API Key
 
-| Service | What it does | Cost | How to get |
-|---|---|---|---|
-| **OpenRouter** | AI vision + transcription | **Free credits** | [openrouter.ai](https://openrouter.ai) → Sign up → Create key |
-| **Windows TTS** | Text-to-speech | **FREE** (built-in) | No key needed! Works offline |
-| **ElevenLabs** | Premium TTS (optional) | Free tier: 10k chars/mo | elevenlabs.io |
+| Service | What | Cost |
+|---|---|---|
+| **OpenRouter** | AI vision + transcription | Free credits on signup |
+| **Windows TTS** | Voice output | FREE (built-in, works offline) |
 
-## 🎮 Features
+1. Go to [openrouter.ai](https://openrouter.ai)
+2. Sign up → Create a key → Copy it
+3. Open Clicky → Click tray icon → Enter API key → Save
 
-- **Configurable hotkey** — Ctrl+Alt (default), Ctrl+Shift, Alt+Shift, or Ctrl+Alt+Shift
-- **Text-only mode** — Disable screen capture for privacy
-- **Audio feedback** — Chime on record start/stop (can be disabled)
-- **Auto-start** — Launch Clicky when you log in
-- **Interaction history** — Last 20 conversations saved
-- **Model fallback** — Auto-tries backup model if primary fails
+---
+
+## ✨ Features
+
+- **Configurable hotkey** — Ctrl+Alt, Ctrl+Shift, Alt+Shift, or all three
 - **Multi-monitor** — Full support for multiple displays
-- **System tray** — Blue triangle icon with right-click menu
+- **Text-only mode** — Disable screen capture for privacy
+- **Audio chimes** — Hear when recording starts/stops
+- **Interaction history** — Last 20 conversations saved
+- **Model fallback** — Auto-retries with backup if primary fails
+- **Auto-start** — Launch on login (toggle in settings)
 
-## ⚙️ Settings
-
-Click the tray icon → settings panel where you can configure:
-- OpenRouter API key
-- AI model selection (Claude, GPT-4, Gemini, etc.)
-- Push-to-talk shortcut
-- TTS provider (Windows built-in or ElevenLabs)
-- Audio feedback, text-only mode, auto-start
-- View recent interactions
+---
 
 ## 🎬 Watch It In Action
 
-| Video | Description |
-|---|---|
-| [Clicky: The AI That Physically Points at Your Screen](https://www.youtube.com/watch?v=aXgKA4J4na0) | Best overview of the pointing mechanic |
-| [Clicky: AI Screen-Aware Tutor Walkthrough](https://www.youtube.com/watch?v=izK2eSGF6vY) | Detailed walkthrough of all features |
-| [Clicky - Open Source AI Teacher](https://www.youtube.com/watch?v=ZX9A31WoBEs) | Setup + full demo |
-| [Farza makes crazy tools!](https://www.youtube.com/watch?v=O_kWKAriT24) | Short demo of blue cursor overlay |
+- [Clicky: The AI That Physically Points at Your Screen](https://www.youtube.com/watch?v=aXgKA4J4na0)
+- [Clicky: AI Screen-Aware Tutor Walkthrough](https://www.youtube.com/watch?v=izK2eSGF6vY)
+- [Clicky - Open Source AI Teacher](https://www.youtube.com/watch?v=ZX9A31WoBEs)
+
+---
 
 ## 🏗️ Project Structure
 
 ```
-ClickyWindows/
-├── setup/                  ← One-click download & run
-│   ├── Clicky.exe          ← Self-contained 71MB executable
-│   ├── install.ps1         ← PowerShell installer
-│   ├── installer.iss       ← Inno Setup script
-│   └── first_run.ps1       ← API key wizard
-├── Core/                   ← State machine, hotkeys, tray, overlay
-├── Services/               ← AI, screen capture, TTS, transcription, audio feedback
-├── UI/                     ← WPF windows, overlay controls, onboarding
-├── Models/                 ← Data types, settings, interaction history
-├── WindowsAPI/             ← Win32 P/Invoke (DPI-aware)
-├── Animations/             ← Bezier flight arc for pointing
-└── App.xaml.cs             ← Entry point, wires everything
+📁 Clickyy/
+├── 🚀 Clicky.bat          ← Bootstrap: auto-downloads + launches
+├── 🚀 Clicky.ps1          ← Same as above (PowerShell, prettier)
+├── 📁 ClickyWindows/      ← Full C# source code (27 files, 4,099 lines)
+├── 📁 setup/              ← Install scripts + settings template
+├── 📁 demo/               ← Interactive HTML demo
+└── 📄 README.md           ← This file
 ```
 
-## ⚙️ Tech Stack
+**Built with:** .NET 8, WPF, Win32 interop, NAudio, OpenRouter API
 
-* **.NET 8** WPF + Win32 interop (DPI-aware)
-* **NAudio** — microphone capture + audio playback + chimes
-* **OpenRouter API** — vision AI + transcription (SSE streaming with model fallback)
-* **Windows SAPI** — free built-in TTS (works offline)
-* **GDI BitBlt** — multi-monitor screen capture
-* **Low-level keyboard hook** — global push-to-talk
+---
 
-## 📄 License
-
-Open source. Built by the community.
+> 💡 **Questions?** Open an issue on GitHub!
